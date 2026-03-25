@@ -32,6 +32,7 @@ jobs:
         with:
           name: nuxt-output
           path: frontend/.output
+          retention-days: 1
 
   deploy:
     name: Deploy to EC2
@@ -57,6 +58,7 @@ jobs:
           port: ${{ secrets.EC2_PORT }}
           source: "frontend/.output"
           target: "/var/www/jcita"
+          strip_components: 1
 
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.0.3
