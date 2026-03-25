@@ -82,7 +82,7 @@ jobs:
             echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
             echo "  🔄 Reloading Nginx..."
             echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-            sudo systemctl reload nginx
+            sudo systemctl reload nginx || sudo systemctl start nginx
 
             echo ""
             echo "✅ Deployment complete!"
