@@ -1,0 +1,103 @@
+name: Deploy to AWS EC2
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    name: Build Nuxt Frontend
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        working-directory: frontend
+        run: bun install
+
+      - name: Build Nuxt
+        working-directory: frontend
+        run: bun run build
+
+      - name: Upload build output
+        uses: actions/upload-artifact@v4
+        with:
+          name: nuxt-output
+          path: frontend/.output
+
+  deploy:
+    name: Deploy to EC2
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download build output
+        uses: actions/download-artifact@v4
+        with:
+          name: nuxt-output
+          path: frontend/.output
+
+      - name: Copy build to EC2
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: ${{ secrets.EC2_PORT }}
+          source: "frontend/.output"
+          target: "/var/www/jcita"
+
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: ${{ secrets.EC2_PORT }}
+          script: |
+            set -e
+
+            echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+            echo "  📦 Pulling latest code..."
+            echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+            cd /var/www/jcita
+            git pull origin main
+
+            echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+            echo "  🔧 Installing PHP dependencies..."
+            echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+            composer install --optimize-autoloader --no-dev --no-interaction
+
+            echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+            echo "  ⚙️  Running Laravel setup..."
+            echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+            php artisan migrate --force
+            php artisan config:cache
+            php artisan route:cache
+            php artisan view:cache
+            php artisan storage:link
+
+            echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+            echo "  🔁 Restarting Nuxt (PM2)..."
+            echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+            pm2 restart nuxt-jcita || pm2 start /var/www/jcita/frontend/.output/server/index.mjs --name "nuxt-jcita"
+            pm2 save
+
+            echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+            echo "  🔄 Reloading Nginx..."
+            echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+            sudo systemctl reload nginx
+
+            echo ""
+            echo "✅ Deployment complete!"
