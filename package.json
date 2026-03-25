@@ -1,0 +1,10 @@
+{
+    "$schema": "https://www.schemastore.org/package.json",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "dev": "cd frontend && bun dev",
+        "build": "cd frontend && bun run build",
+        "postinstall": "cd frontend && bun install"
+    }
+}
