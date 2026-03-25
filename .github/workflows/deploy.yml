@@ -75,8 +75,9 @@ jobs:
             echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
             echo "  🔁 Restarting Nuxt (PM2)..."
             echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-            pm2 restart nuxt-jcita || pm2 start /var/www/jcita/frontend/.output/server/index.mjs --name "nuxt-jcita"
-            pm2 save
+            export PATH="$PATH:/home/ubuntu/.bun/bin"
+            /home/ubuntu/.bun/bin/pm2 restart nuxt-jcita || /home/ubuntu/.bun/bin/pm2 start /var/www/jcita/frontend/.output/server/index.mjs --name "nuxt-jcita"
+            /home/ubuntu/.bun/bin/pm2 save
 
             echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
             echo "  🔄 Reloading Nginx..."
