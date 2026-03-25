@@ -226,7 +226,7 @@ const ministries = [
                         href="#services"
                         class="px-8 py-3.5 bg-amber-400 text-neutral-950 font-bold rounded-lg hover:bg-amber-300 transition-colors uppercase tracking-wider text-sm"
                     >
-                        Join Our Worship
+                        Join Our Worship | Test
                     </a>
                     <a
                         href="#contact"
