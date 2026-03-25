@@ -6,14 +6,16 @@ on:
       - main
 
 jobs:
-  build:
-    name: Build Nuxt Frontend
+  build-and-deploy:
+    name: Build Nuxt & Deploy to EC2
     runs-on: ubuntu-latest
 
     steps:
+      # ─── Checkout ───────────────────────────────────────────────
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # ─── Build Nuxt ─────────────────────────────────────────────
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
         with:
@@ -27,28 +29,7 @@ jobs:
         working-directory: frontend
         run: bun run build
 
-      - name: Upload build output
-        uses: actions/upload-artifact@v4
-        with:
-          name: nuxt-output
-          path: frontend/.output
-          retention-days: 1
-
-  deploy:
-    name: Deploy to EC2
-    runs-on: ubuntu-latest
-    needs: build
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Download build output
-        uses: actions/download-artifact@v4
-        with:
-          name: nuxt-output
-          path: frontend/.output
-
+      # ─── Copy build to EC2 ──────────────────────────────────────
       - name: Copy build to EC2
         uses: appleboy/scp-action@v0.1.7
         with:
@@ -57,9 +38,10 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           port: ${{ secrets.EC2_PORT }}
           source: "frontend/.output"
-          target: "/var/www/jcita"
+          target: "/var/www/jcita/frontend"
           strip_components: 1
 
+      # ─── Deploy Laravel + Restart ───────────────────────────────
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
