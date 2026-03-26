@@ -14,8 +14,8 @@ export default defineNuxtConfig({
             importScripts: ['/sw-push.js'],
         },
         manifest: {
-            name: 'JCITA Tabacuhan',
-            short_name: 'JCITA',
+            name: 'JCITA App',
+            short_name: 'JCITA App',
             theme_color: '#ffffff',
             icons: [
                 {
