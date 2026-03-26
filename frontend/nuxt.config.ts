@@ -10,6 +10,7 @@ export default defineNuxtConfig({
     pwa: {
         registerType: 'autoUpdate',
         workbox: {
+            navigateFallback: null,
             importScripts: ['/sw-push.js'],
         },
         manifest: {
