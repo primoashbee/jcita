@@ -10,14 +10,14 @@ export const usePush = () => {
         const permission = await Notification.requestPermission()
         if (permission !== 'granted') return
 
-        const { data } = await useFetch<{ public_key: string }>(`${apiBase}/push/vapid-public-key`)
-        if (!data.value?.public_key) return
+        const data = await $fetch<{ public_key: string }>(`${apiBase}/push/vapid-public-key`)
+        if (!data?.public_key) return
 
         const registration = await navigator.serviceWorker.ready
 
         const subscription = await registration.pushManager.subscribe({
             userVisibleOnly: true,
-            applicationServerKey: urlBase64ToUint8Array(data.value.public_key),
+            applicationServerKey: urlBase64ToUint8Array(data.public_key),
         })
 
         const key = subscription.getKey('p256dh')
