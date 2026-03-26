@@ -9,6 +9,9 @@ export default defineNuxtConfig({
 
     pwa: {
         registerType: 'autoUpdate',
+        workbox: {
+            importScripts: ['/sw-push.js'],
+        },
         manifest: {
             name: 'JCITA Tabacuhan',
             short_name: 'JCITA',
