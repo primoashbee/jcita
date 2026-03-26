@@ -27,6 +27,8 @@ jobs:
 
       - name: Build Nuxt
         working-directory: frontend
+        env:
+          API_BASE_URL: ${{ secrets.API_BASE_URL }}
         run: bun run build
 
       # ─── Copy build to EC2 ──────────────────────────────────────
