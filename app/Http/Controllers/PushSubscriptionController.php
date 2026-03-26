@@ -39,6 +39,10 @@ class PushSubscriptionController extends Controller
 
     public function sendNotification(Request $request)
     {
+        if ($request->header('X-Push-Secret') !== config('app.push_secret')) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+
         $request->validate([
             'title' => 'required|string',
             'body'  => 'required|string',

@@ -1,4 +1,19 @@
 <script setup lang="ts">
+const { subscribe } = usePush()
+
+const showBanner = ref(false)
+
+onMounted(() => {
+    if ('Notification' in window && Notification.permission === 'default') {
+        showBanner.value = true
+    }
+})
+
+const enableNotifications = async () => {
+    showBanner.value = false
+    await subscribe()
+}
+
 useHead({
     title: "JCITA Tabacuhan | Jesus Christ is the Answer Church",
     meta: [
@@ -122,6 +137,36 @@ const ministries = [
 
 <template>
     <div class="min-h-screen bg-neutral-950 text-white">
+        <!-- Push Notification Banner -->
+        <div
+            v-if="showBanner"
+            class="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-4 sm:w-96 z-50 bg-neutral-900 border border-amber-400/30 rounded-xl p-4 shadow-xl flex items-center gap-4"
+        >
+            <div class="text-amber-400">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 00-5-5.917V4a1 1 0 10-2 0v1.083A6 6 0 006 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                </svg>
+            </div>
+            <div class="flex-1">
+                <p class="text-white text-sm font-semibold">Stay Updated</p>
+                <p class="text-neutral-400 text-xs">Get notified about services and events.</p>
+            </div>
+            <div class="flex gap-2">
+                <button
+                    class="px-3 py-1.5 bg-amber-400 text-neutral-950 text-xs font-bold rounded-lg hover:bg-amber-300 transition-colors"
+                    @click="enableNotifications"
+                >
+                    Allow
+                </button>
+                <button
+                    class="px-3 py-1.5 text-neutral-500 text-xs hover:text-neutral-300 transition-colors"
+                    @click="showBanner = false"
+                >
+                    Later
+                </button>
+            </div>
+        </div>
+
         <!-- Navigation -->
         <nav
             class="fixed top-0 left-0 right-0 z-50 bg-neutral-950/95 backdrop-blur-sm border-b border-neutral-800"
