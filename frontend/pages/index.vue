@@ -15,7 +15,7 @@ const enableNotifications = async () => {
 }
 
 useHead({
-    title: "JCITA Tabacuhan | Jesus Christ is the Answer Church",
+    title: "JCITA App",
     meta: [
         {
             name: "description",
