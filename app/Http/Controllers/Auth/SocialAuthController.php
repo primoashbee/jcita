@@ -17,7 +17,7 @@ class SocialAuthController extends Controller
         $driver = Socialite::driver($provider)->stateless();
 
         if ($provider === 'facebook') {
-            $driver->scopes(['public_profile']);
+            $driver->setScopes(['public_profile']);
         }
 
         return $driver->redirect();
