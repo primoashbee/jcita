@@ -60,9 +60,9 @@ useHead({ title: 'Privacy Policy — JCITA' })
                     <p>We implement appropriate technical measures to protect your personal information. Your password is encrypted using industry-standard hashing. Access tokens are stored securely and expire after 30 days of inactivity.</p>
                 </section>
 
-                <section style="margin-bottom:32px;">
-                    <h2 style="color:#fff; font-size:18px; font-weight:700; margin:0 0 12px;">6. Data Retention</h2>
-                    <p>We retain your personal information for as long as your account is active. You may request deletion of your account and all associated data by contacting us at the email below.</p>
+                <section id="data-retention" style="margin-bottom:32px;">
+                    <h2 style="color:#fff; font-size:18px; font-weight:700; margin:0 0 12px;">6. Data Retention & Deletion</h2>
+                    <p>We retain your personal information for as long as your account is active. To request deletion of your account and all associated personal data, contact us via Facebook at <a href="https://www.facebook.com/JCITATabacuhan" target="_blank" style="color:#fbbf24; text-decoration:none;">facebook.com/JCITATabacuhan</a>. We will process your request within 30 days.</p>
                 </section>
 
                 <section style="margin-bottom:32px;">
