@@ -61,11 +61,6 @@ jobs:
             git pull origin main
 
             echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-            echo "  🔧 Installing PHP dependencies..."
-            echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-            composer install --optimize-autoloader --no-dev --no-interaction
-
-            echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
             echo "  🔑 Fixing permissions..."
             echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
             sudo chown -R $USER:www-data /var/www/jcita/storage /var/www/jcita/bootstrap/cache /var/www/jcita/database
@@ -73,6 +68,11 @@ jobs:
             sudo touch /var/www/jcita/database/database.sqlite
             sudo chown $USER:www-data /var/www/jcita/database/database.sqlite
             sudo chmod 664 /var/www/jcita/database/database.sqlite
+
+            echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+            echo "  🔧 Installing PHP dependencies..."
+            echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+            composer install --optimize-autoloader --no-dev --no-interaction
 
             echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
             echo "  ⚙️  Running Laravel setup..."
