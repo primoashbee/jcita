@@ -1,4 +1,14 @@
 <script setup lang="ts">
+const { isLoggedIn } = useAuth()
+
+// PWA entry point: always redirect based on auth state
+const router = useRouter()
+if (isLoggedIn.value) {
+    await navigateTo('/dashboard', { replace: true })
+} else {
+    await navigateTo('/auth/login', { replace: true })
+}
+
 const { subscribe } = usePush()
 
 const showBanner = ref(false)

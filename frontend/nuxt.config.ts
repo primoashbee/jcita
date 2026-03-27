@@ -16,7 +16,10 @@ export default defineNuxtConfig({
         manifest: {
             name: 'JCITA App',
             short_name: 'JCITA App',
-            theme_color: '#ffffff',
+            start_url: '/auth/login',
+            display: 'standalone',
+            theme_color: '#0a0a0a',
+            background_color: '#0a0a0a',
             icons: [
                 {
                     src: '/icon-192x192.png',

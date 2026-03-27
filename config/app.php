@@ -15,6 +15,8 @@ return [
 
     'name' => env('APP_NAME', 'Laravel'),
 
+    'frontend_url' => env('FRONTEND_URL', 'http://localhost:3000'),
+
     'vapid_public_key' => env('VAPID_PUBLIC_KEY'),
     'vapid_private_key' => env('VAPID_PRIVATE_KEY'),
     'push_secret' => env('PUSH_SECRET'),
