@@ -7,6 +7,12 @@ export default defineNuxtConfig({
         '@vite-pwa/nuxt',
     ],
 
+    tailwindcss: {
+        config: {
+            darkMode: 'class',
+        },
+    },
+
     pwa: {
         registerType: 'autoUpdate',
         workbox: {

@@ -2,6 +2,22 @@
 const { isLoggedIn } = useAuth()
 const { subscribe } = usePush()
 
+const isDark = ref(true)
+
+const applyMode = (dark: boolean) => {
+    if (dark) {
+        document.documentElement.classList.add('dark')
+    } else {
+        document.documentElement.classList.remove('dark')
+    }
+}
+
+const toggleColorMode = () => {
+    isDark.value = !isDark.value
+    localStorage.setItem('jcita-color-mode', isDark.value ? 'dark' : 'light')
+    applyMode(isDark.value)
+}
+
 const showBanner = ref(false)
 
 onMounted(() => {
@@ -12,6 +28,10 @@ onMounted(() => {
         navigateTo(isLoggedIn.value ? '/dashboard' : '/auth/login', { replace: true })
         return
     }
+
+    const saved = localStorage.getItem('jcita-color-mode')
+    isDark.value = saved ? saved === 'dark' : true
+    applyMode(isDark.value)
 
     if ('Notification' in window && Notification.permission === 'default') {
         showBanner.value = true
@@ -145,11 +165,11 @@ const ministries = [
 </script>
 
 <template>
-    <div class="min-h-screen bg-neutral-950 text-white">
+    <div class="min-h-screen bg-white dark:bg-neutral-950 text-neutral-900 dark:text-white">
         <!-- Push Notification Banner -->
         <div
             v-if="showBanner"
-            class="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-4 sm:w-96 z-50 bg-neutral-900 border border-amber-400/30 rounded-xl p-4 shadow-xl flex items-center gap-4"
+            class="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-4 sm:w-96 z-50 bg-white dark:bg-neutral-900 border border-amber-400/30 rounded-xl p-4 shadow-xl flex items-center gap-4"
         >
             <div class="text-amber-400">
                 <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -157,8 +177,8 @@ const ministries = [
                 </svg>
             </div>
             <div class="flex-1">
-                <p class="text-white text-sm font-semibold">Stay Updated</p>
-                <p class="text-neutral-400 text-xs">Get notified about services and events.</p>
+                <p class="text-neutral-900 dark:text-white text-sm font-semibold">Stay Updated</p>
+                <p class="text-neutral-500 dark:text-neutral-400 text-xs">Get notified about services and events.</p>
             </div>
             <div class="flex gap-2">
                 <button
@@ -168,7 +188,7 @@ const ministries = [
                     Allow
                 </button>
                 <button
-                    class="px-3 py-1.5 text-neutral-500 text-xs hover:text-neutral-300 transition-colors"
+                    class="px-3 py-1.5 text-neutral-500 text-xs hover:text-neutral-700 dark:hover:text-neutral-300 transition-colors"
                     @click="showBanner = false"
                 >
                     Later
@@ -177,17 +197,11 @@ const ministries = [
         </div>
 
         <!-- Navigation -->
-        <nav
-            class="fixed top-0 left-0 right-0 z-50 bg-neutral-950/95 backdrop-blur-sm border-b border-neutral-800"
-        >
+        <nav class="fixed top-0 left-0 right-0 z-50 bg-white/95 dark:bg-neutral-950/95 backdrop-blur-sm border-b border-neutral-200 dark:border-neutral-800">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex justify-between items-center h-16">
                     <a href="#home" class="flex items-center gap-3">
-                        <img
-                            :src="'/logo.png'"
-                            alt="JCITA Logo"
-                            class="h-10 invert"
-                        />
+                        <img :src="'/logo.png'" alt="JCITA Logo" class="h-10 dark:invert" />
                     </a>
 
                     <!-- Desktop nav -->
@@ -196,48 +210,59 @@ const ministries = [
                             v-for="link in navLinks"
                             :key="link.href"
                             :href="link.href"
-                            class="text-sm font-medium text-neutral-400 hover:text-amber-400 transition-colors uppercase tracking-wider"
+                            class="text-sm font-medium text-neutral-500 dark:text-neutral-400 hover:text-amber-500 dark:hover:text-amber-400 transition-colors uppercase tracking-wider"
                         >
                             {{ link.label }}
                         </a>
+
+                        <!-- Color mode toggle -->
+                        <button
+                            @click="toggleColorMode"
+                            class="p-2 rounded-lg text-neutral-500 dark:text-neutral-400 hover:text-amber-500 dark:hover:text-amber-400 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
+                            :title="isDark ? 'Switch to light mode' : 'Switch to dark mode'"
+                        >
+                            <!-- Sun (show in dark mode to switch to light) -->
+                            <svg v-if="isDark" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707M17.657 17.657l-.707-.707M6.343 6.343l-.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z"/>
+                            </svg>
+                            <!-- Moon (show in light mode to switch to dark) -->
+                            <svg v-else class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+                            </svg>
+                        </button>
                     </div>
 
-                    <!-- Mobile menu button -->
-                    <button class="md:hidden p-2" @click="navOpen = !navOpen">
-                        <svg
-                            class="w-6 h-6 text-neutral-400"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
+                    <div class="flex items-center gap-2 md:hidden">
+                        <!-- Color mode toggle (mobile) -->
+                        <button
+                            @click="toggleColorMode"
+                            class="p-2 rounded-lg text-neutral-500 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
                         >
-                            <path
-                                v-if="!navOpen"
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M4 6h16M4 12h16M4 18h16"
-                            />
-                            <path
-                                v-else
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M6 18L18 6M6 6l12 12"
-                            />
-                        </svg>
-                    </button>
+                            <svg v-if="isDark" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707M17.657 17.657l-.707-.707M6.343 6.343l-.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z"/>
+                            </svg>
+                            <svg v-else class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+                            </svg>
+                        </button>
+
+                        <!-- Mobile menu button -->
+                        <button class="p-2" @click="navOpen = !navOpen">
+                            <svg class="w-6 h-6 text-neutral-500 dark:text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path v-if="!navOpen" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                                <path v-else stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Mobile nav -->
-                <div
-                    v-if="navOpen"
-                    class="md:hidden pb-4 border-t border-neutral-800"
-                >
+                <div v-if="navOpen" class="md:hidden pb-4 border-t border-neutral-200 dark:border-neutral-800">
                     <a
                         v-for="link in navLinks"
                         :key="link.href"
                         :href="link.href"
-                        class="block py-3 text-sm font-medium text-neutral-400 hover:text-amber-400 uppercase tracking-wider"
+                        class="block py-3 text-sm font-medium text-neutral-500 dark:text-neutral-400 hover:text-amber-500 dark:hover:text-amber-400 uppercase tracking-wider"
                         @click="navOpen = false"
                     >
                         {{ link.label }}
@@ -247,32 +272,20 @@ const ministries = [
         </nav>
 
         <!-- Hero Section -->
-        <section
-            id="home"
-            class="relative min-h-screen flex items-center justify-center pt-16"
-        >
-            <!-- Background pattern -->
-            <div
-                class="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(251,191,36,0.08)_0%,_transparent_70%)]"
-            ></div>
+        <section id="home" class="relative min-h-screen flex items-center justify-center pt-16">
+            <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(251,191,36,0.08)_0%,_transparent_70%)]"></div>
 
             <div class="relative z-10 text-center px-4 max-w-5xl mx-auto">
-                <img
-                    :src="'/logo.png'"
-                    alt="JCITA Logo"
-                    class="h-32 sm:h-40 md:h-48 mx-auto mb-8 invert"
-                />
+                <img :src="'/logo.png'" alt="JCITA Logo" class="h-32 sm:h-40 md:h-48 mx-auto mb-8 dark:invert" />
 
-                <h1
-                    class="text-4xl sm:text-5xl md:text-7xl font-black mb-4 leading-tight tracking-tight"
-                >
+                <h1 class="text-4xl sm:text-5xl md:text-7xl font-black mb-4 leading-tight tracking-tight text-neutral-900 dark:text-white">
                     Jesus Christ is<br />
-                    <span class="text-amber-400">the Answer</span>
+                    <span class="text-amber-500 dark:text-amber-400">the Answer</span>
                 </h1>
-                <p class="text-lg sm:text-xl text-neutral-400 mb-2 font-medium">
+                <p class="text-lg sm:text-xl text-neutral-500 dark:text-neutral-400 mb-2 font-medium">
                     Assembly of God Church
                 </p>
-                <p class="text-neutral-500 mb-10">
+                <p class="text-neutral-400 dark:text-neutral-500 mb-10">
                     Tabacuhan, Sta. Rita, Olongapo City, Zambales
                 </p>
                 <div class="flex flex-col sm:flex-row gap-4 justify-center">
@@ -280,11 +293,11 @@ const ministries = [
                         href="#services"
                         class="px-8 py-3.5 bg-amber-400 text-neutral-950 font-bold rounded-lg hover:bg-amber-300 transition-colors uppercase tracking-wider text-sm"
                     >
-                        Join Our Worship | Test
+                        Join Our Worship
                     </a>
                     <a
                         href="#contact"
-                        class="px-8 py-3.5 border-2 border-neutral-600 text-neutral-300 font-bold rounded-lg hover:border-amber-400 hover:text-amber-400 transition-colors uppercase tracking-wider text-sm"
+                        class="px-8 py-3.5 border-2 border-neutral-300 dark:border-neutral-600 text-neutral-600 dark:text-neutral-300 font-bold rounded-lg hover:border-amber-500 dark:hover:border-amber-400 hover:text-amber-500 dark:hover:text-amber-400 transition-colors uppercase tracking-wider text-sm"
                     >
                         Get in Touch
                     </a>
@@ -293,108 +306,57 @@ const ministries = [
         </section>
 
         <!-- Logo Meaning Section -->
-        <section class="py-20 bg-neutral-900 border-y border-neutral-800">
+        <section class="py-20 bg-neutral-50 dark:bg-neutral-900 border-y border-neutral-200 dark:border-neutral-800">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="text-center mb-14">
-                    <h2
-                        class="text-3xl sm:text-4xl font-black text-white mb-4 tracking-tight"
-                    >
-                        What <span class="text-amber-400">JCITA</span> Stands
-                        For
+                    <h2 class="text-3xl sm:text-4xl font-black text-neutral-900 dark:text-white mb-4 tracking-tight">
+                        What <span class="text-amber-500 dark:text-amber-400">JCITA</span> Stands For
                     </h2>
-                    <p class="text-neutral-500 text-lg">
-                        Each letter in our logo carries a purpose
-                    </p>
+                    <p class="text-neutral-500 text-lg">Each letter in our logo carries a purpose</p>
                 </div>
-                <div
-                    class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6"
-                >
+                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6">
                     <div
                         v-for="item in logoMeaning"
                         :key="item.letter"
-                        class="bg-neutral-950 border border-neutral-800 rounded-xl p-6 text-center hover:border-amber-400/50 transition-all group"
+                        class="bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 rounded-xl p-6 text-center hover:border-amber-400/50 transition-all group"
                     >
-                        <div
-                            class="text-amber-400 flex justify-center mb-3 group-hover:scale-110 transition-transform"
-                            v-html="item.icon"
-                        ></div>
-                        <div class="text-4xl font-black text-white mb-1">
-                            {{ item.letter }}
-                        </div>
-                        <div
-                            class="text-amber-400 font-semibold text-sm uppercase tracking-wider mb-2"
-                        >
-                            {{ item.symbol }}
-                        </div>
-                        <p class="text-neutral-500 text-xs leading-relaxed">
-                            {{ item.meaning }}
-                        </p>
-                        <p
-                            v-if="item.verse"
-                            class="text-amber-400/60 text-xs mt-2 italic"
-                        >
-                            {{ item.verse }}
-                        </p>
+                        <div class="text-amber-500 dark:text-amber-400 flex justify-center mb-3 group-hover:scale-110 transition-transform" v-html="item.icon"></div>
+                        <div class="text-4xl font-black text-neutral-900 dark:text-white mb-1">{{ item.letter }}</div>
+                        <div class="text-amber-500 dark:text-amber-400 font-semibold text-sm uppercase tracking-wider mb-2">{{ item.symbol }}</div>
+                        <p class="text-neutral-500 text-xs leading-relaxed">{{ item.meaning }}</p>
+                        <p v-if="item.verse" class="text-amber-500/60 dark:text-amber-400/60 text-xs mt-2 italic">{{ item.verse }}</p>
                     </div>
                 </div>
             </div>
         </section>
 
         <!-- About Section -->
-        <section id="about" class="py-20 bg-neutral-950">
+        <section id="about" class="py-20 bg-white dark:bg-neutral-950">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="text-center mb-14">
-                    <h2
-                        class="text-3xl sm:text-4xl font-black text-white mb-4 tracking-tight"
-                    >
-                        About Our Church
-                    </h2>
+                    <h2 class="text-3xl sm:text-4xl font-black text-neutral-900 dark:text-white mb-4 tracking-tight">About Our Church</h2>
                     <div class="w-20 h-1 bg-amber-400 mx-auto"></div>
                 </div>
                 <div class="grid md:grid-cols-2 gap-12 items-center">
                     <div>
-                        <!-- <p class="text-lg text-neutral-400 leading-relaxed mb-6">
-                            Jesus Christ is the Answer (JCITA) is a vibrant Assembly of God church located in the heart
-                            of Tabacuhan, Sta. Rita, Olongapo City, Zambales. We are part of the
-                            <strong class="text-white">Philippines General Council of the Assemblies of God (PGCAG)</strong> under the
-                            Central Luzon District.
-                        </p> -->
-                        <p
-                            class="text-lg text-neutral-400 leading-relaxed mb-6"
-                        >
-                            Our mission is to share the love of Jesus Christ
-                            with every person in our community through worship,
-                            fellowship, discipleship, and service. We believe
-                            that Jesus Christ truly is the answer to every need,
+                        <p class="text-lg text-neutral-600 dark:text-neutral-400 leading-relaxed mb-6">
+                            Our mission is to share the love of Jesus Christ with every person in our community through worship,
+                            fellowship, discipleship, and service. We believe that Jesus Christ truly is the answer to every need,
                             every question, and every challenge in life.
                         </p>
-                        <p class="text-lg text-neutral-400 leading-relaxed">
-                            Whether you are a long-time believer or just
-                            exploring faith, you are welcome here. Come as you
-                            are and experience the transforming power of God's
-                            love.
+                        <p class="text-lg text-neutral-600 dark:text-neutral-400 leading-relaxed">
+                            Whether you are a long-time believer or just exploring faith, you are welcome here. Come as you
+                            are and experience the transforming power of God's love.
                         </p>
                     </div>
-                    <div
-                        class="bg-neutral-900 border border-neutral-800 rounded-2xl p-8 text-center"
-                    >
-                        <svg
-                            class="w-16 h-16 text-amber-400 mx-auto mb-4"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="1.5"
-                        >
+                    <div class="bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-2xl p-8 text-center">
+                        <svg class="w-16 h-16 text-amber-400 mx-auto mb-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                             <line x1="12" y1="2" x2="12" y2="22" />
                             <line x1="5" y1="8" x2="19" y2="8" />
                         </svg>
-                        <h3 class="text-2xl font-black text-white mb-4">
-                            Our Vision
-                        </h3>
-                        <p class="text-amber-400/80 text-lg italic">
-                            "To be a Christ-centered community that transforms
-                            lives, builds families, and impacts our city for the
-                            glory of God."
+                        <h3 class="text-2xl font-black text-neutral-900 dark:text-white mb-4">Our Vision</h3>
+                        <p class="text-amber-500/80 dark:text-amber-400/80 text-lg italic">
+                            "To be a Christ-centered community that transforms lives, builds families, and impacts our city for the glory of God."
                         </p>
                     </div>
                 </div>
@@ -402,128 +364,79 @@ const ministries = [
         </section>
 
         <!-- Service Schedule -->
-        <section
-            id="services"
-            class="py-20 bg-neutral-900 border-y border-neutral-800"
-        >
+        <section id="services" class="py-20 bg-neutral-50 dark:bg-neutral-900 border-y border-neutral-200 dark:border-neutral-800">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="text-center mb-14">
-                    <h2
-                        class="text-3xl sm:text-4xl font-black text-white mb-4 tracking-tight"
-                    >
-                        Service Schedule
-                    </h2>
+                    <h2 class="text-3xl sm:text-4xl font-black text-neutral-900 dark:text-white mb-4 tracking-tight">Service Schedule</h2>
                     <div class="w-20 h-1 bg-amber-400 mx-auto mb-4"></div>
-                    <p class="text-neutral-500 text-lg">
-                        Join us for worship and fellowship
-                    </p>
+                    <p class="text-neutral-500 text-lg">Join us for worship and fellowship</p>
                 </div>
                 <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
                     <div
                         v-for="service in serviceSchedule"
                         :key="service.day"
-                        class="bg-neutral-950 border border-neutral-800 rounded-xl p-6 text-center hover:border-amber-400/50 transition-all group"
+                        class="bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 rounded-xl p-6 text-center hover:border-amber-400/50 transition-all group"
                     >
-                        <div
-                            class="text-amber-400 flex justify-center mb-4 group-hover:scale-110 transition-transform"
-                            v-html="service.icon"
-                        ></div>
-                        <h3 class="font-bold text-white mb-2">
-                            {{ service.day }}
-                        </h3>
-                        <p class="text-amber-400 font-medium text-sm">
-                            {{ service.time }}
-                        </p>
+                        <div class="text-amber-500 dark:text-amber-400 flex justify-center mb-4 group-hover:scale-110 transition-transform" v-html="service.icon"></div>
+                        <h3 class="font-bold text-neutral-900 dark:text-white mb-2">{{ service.day }}</h3>
+                        <p class="text-amber-500 dark:text-amber-400 font-medium text-sm">{{ service.time }}</p>
                     </div>
                 </div>
             </div>
         </section>
 
         <!-- Ministries -->
-        <section id="ministries" class="py-20 bg-neutral-950">
+        <section id="ministries" class="py-20 bg-white dark:bg-neutral-950">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="text-center mb-14">
-                    <h2
-                        class="text-3xl sm:text-4xl font-black text-white mb-4 tracking-tight"
-                    >
-                        Our Ministries
-                    </h2>
+                    <h2 class="text-3xl sm:text-4xl font-black text-neutral-900 dark:text-white mb-4 tracking-tight">Our Ministries</h2>
                     <div class="w-20 h-1 bg-amber-400 mx-auto mb-4"></div>
-                    <p class="text-neutral-500 text-lg">
-                        Get involved and grow in your faith
-                    </p>
+                    <p class="text-neutral-500 text-lg">Get involved and grow in your faith</p>
                 </div>
                 <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
                     <div
                         v-for="(ministry, index) in ministries"
                         :key="ministry.name"
-                        class="bg-neutral-900 border border-neutral-800 rounded-xl p-6 hover:border-amber-400/50 transition-all group"
+                        class="bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl p-6 hover:border-amber-400/50 transition-all group"
                     >
-                        <div
-                            class="w-10 h-10 bg-amber-400/10 border border-amber-400/30 rounded-lg flex items-center justify-center mb-4 text-amber-400 font-bold text-sm group-hover:bg-amber-400/20 transition-colors"
-                        >
+                        <div class="w-10 h-10 bg-amber-400/10 border border-amber-400/30 rounded-lg flex items-center justify-center mb-4 text-amber-500 dark:text-amber-400 font-bold text-sm group-hover:bg-amber-400/20 transition-colors">
                             {{ String(index + 1).padStart(2, "0") }}
                         </div>
-                        <h3 class="text-lg font-bold text-white mb-2">
-                            {{ ministry.name }}
-                        </h3>
-                        <p class="text-neutral-500 text-sm leading-relaxed">
-                            {{ ministry.description }}
-                        </p>
+                        <h3 class="text-lg font-bold text-neutral-900 dark:text-white mb-2">{{ ministry.name }}</h3>
+                        <p class="text-neutral-500 text-sm leading-relaxed">{{ ministry.description }}</p>
                     </div>
                 </div>
             </div>
         </section>
 
         <!-- Contact & Location -->
-        <section
-            id="contact"
-            class="py-20 bg-neutral-900 border-t border-neutral-800"
-        >
+        <section id="contact" class="py-20 bg-neutral-50 dark:bg-neutral-900 border-t border-neutral-200 dark:border-neutral-800">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="text-center mb-14">
-                    <h2
-                        class="text-3xl sm:text-4xl font-black text-white mb-4 tracking-tight"
-                    >
-                        Visit Us
-                    </h2>
+                    <h2 class="text-3xl sm:text-4xl font-black text-neutral-900 dark:text-white mb-4 tracking-tight">Visit Us</h2>
                     <div class="w-20 h-1 bg-amber-400 mx-auto"></div>
                 </div>
                 <div class="grid md:grid-cols-2 gap-12">
                     <div>
                         <div class="mb-8">
-                            <h3
-                                class="text-lg font-bold text-amber-400 uppercase tracking-wider mb-3"
-                            >
-                                Church Address
-                            </h3>
-                            <p class="text-neutral-400 text-lg leading-relaxed">
+                            <h3 class="text-lg font-bold text-amber-500 dark:text-amber-400 uppercase tracking-wider mb-3">Church Address</h3>
+                            <p class="text-neutral-600 dark:text-neutral-400 text-lg leading-relaxed">
                                 1384 Tabacuhan, Sta. Rita<br />
                                 Olongapo City, Zambales 2200<br />
                                 Philippines
                             </p>
                         </div>
                         <div class="mb-8">
-                            <h3
-                                class="text-lg font-bold text-amber-400 uppercase tracking-wider mb-4"
-                            >
-                                Connect With Us
-                            </h3>
+                            <h3 class="text-lg font-bold text-amber-500 dark:text-amber-400 uppercase tracking-wider mb-4">Connect With Us</h3>
                             <div class="flex gap-4">
                                 <a
                                     href="https://www.facebook.com/JCITATabacuhan"
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    class="flex items-center gap-2 px-5 py-2.5 bg-neutral-800 border border-neutral-700 text-white rounded-lg hover:border-amber-400 hover:text-amber-400 transition-all text-sm font-medium"
+                                    class="flex items-center gap-2 px-5 py-2.5 bg-white dark:bg-neutral-800 border border-neutral-300 dark:border-neutral-700 text-neutral-700 dark:text-white rounded-lg hover:border-amber-500 dark:hover:border-amber-400 hover:text-amber-500 dark:hover:text-amber-400 transition-all text-sm font-medium"
                                 >
-                                    <svg
-                                        class="w-5 h-5"
-                                        fill="currentColor"
-                                        viewBox="0 0 24 24"
-                                    >
-                                        <path
-                                            d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"
-                                        />
+                                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
                                     </svg>
                                     Facebook
                                 </a>
@@ -531,37 +444,24 @@ const ministries = [
                                     href="https://x.com/JCITATabacuhan"
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    class="flex items-center gap-2 px-5 py-2.5 bg-neutral-800 border border-neutral-700 text-white rounded-lg hover:border-amber-400 hover:text-amber-400 transition-all text-sm font-medium"
+                                    class="flex items-center gap-2 px-5 py-2.5 bg-white dark:bg-neutral-800 border border-neutral-300 dark:border-neutral-700 text-neutral-700 dark:text-white rounded-lg hover:border-amber-500 dark:hover:border-amber-400 hover:text-amber-500 dark:hover:text-amber-400 transition-all text-sm font-medium"
                                 >
-                                    <svg
-                                        class="w-5 h-5"
-                                        fill="currentColor"
-                                        viewBox="0 0 24 24"
-                                    >
-                                        <path
-                                            d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"
-                                        />
+                                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
                                     </svg>
                                     X / Twitter
                                 </a>
                             </div>
                         </div>
                         <div>
-                            <h3
-                                class="text-lg font-bold text-amber-400 uppercase tracking-wider mb-3"
-                            >
-                                Affiliation
-                            </h3>
-                            <p class="text-neutral-400">
-                                Philippines General Council of the Assemblies of
-                                God (PGCAG)<br />
+                            <h3 class="text-lg font-bold text-amber-500 dark:text-amber-400 uppercase tracking-wider mb-3">Affiliation</h3>
+                            <p class="text-neutral-600 dark:text-neutral-400">
+                                Philippines General Council of the Assemblies of God (PGCAG)<br />
                                 Central Luzon District
                             </p>
                         </div>
                     </div>
-                    <div
-                        class="bg-neutral-800 rounded-2xl overflow-hidden min-h-[300px] border border-neutral-700"
-                    >
+                    <div class="bg-neutral-200 dark:bg-neutral-800 rounded-2xl overflow-hidden min-h-[300px] border border-neutral-300 dark:border-neutral-700">
                         <iframe
                             src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3849.0!2d120.28!3d14.83!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2sTabacuhan%2C+Sta.+Rita%2C+Olongapo+City!5e0!3m2!1sen!2sph!4v1"
                             width="100%"
@@ -577,25 +477,17 @@ const ministries = [
         </section>
 
         <!-- Footer -->
-        <footer class="bg-neutral-950 border-t border-neutral-800 py-12">
+        <footer class="bg-white dark:bg-neutral-950 border-t border-neutral-200 dark:border-neutral-800 py-12">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="text-center">
-                    <img
-                        :src="'/logo.png'"
-                        alt="JCITA Logo"
-                        class="h-12 mx-auto mb-4 invert"
-                    />
-                    <p class="text-neutral-500 mb-4">
-                        Jesus Christ is the Answer Church, Assembly of God
+                    <img :src="'/logo.png'" alt="JCITA Logo" class="h-12 mx-auto mb-4 dark:invert" />
+                    <p class="text-neutral-500 mb-4">Jesus Christ is the Answer Church, Assembly of God</p>
+                    <p class="text-neutral-400 dark:text-neutral-600 text-sm">
+                        1384 Tabacuhan, Sta. Rita, Olongapo City, Zambales 2200, Philippines
                     </p>
-                    <p class="text-neutral-600 text-sm">
-                        1384 Tabacuhan, Sta. Rita, Olongapo City, Zambales 2200,
-                        Philippines
-                    </p>
-                    <div class="mt-6 pt-6 border-t border-neutral-800">
-                        <p class="text-neutral-700 text-sm">
-                            &copy; {{ new Date().getFullYear() }} JCITA
-                            Tabacuhan. All rights reserved.
+                    <div class="mt-6 pt-6 border-t border-neutral-200 dark:border-neutral-800">
+                        <p class="text-neutral-400 dark:text-neutral-700 text-sm">
+                            &copy; {{ new Date().getFullYear() }} JCITA Tabacuhan. All rights reserved.
                         </p>
                     </div>
                 </div>

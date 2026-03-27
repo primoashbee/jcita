@@ -63,11 +63,17 @@ jobs:
             echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
             echo "  🔑 Fixing permissions..."
             echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-            sudo chown -R $USER:www-data /var/www/jcita/storage /var/www/jcita/bootstrap/cache /var/www/jcita/database
-            sudo chmod -R 775 /var/www/jcita/storage /var/www/jcita/bootstrap/cache /var/www/jcita/database
-            sudo touch /var/www/jcita/database/database.sqlite
-            sudo chown $USER:www-data /var/www/jcita/database/database.sqlite
-            sudo chmod 664 /var/www/jcita/database/database.sqlite
+            sudo chown -R $USER:www-data /var/www/jcita/storage /var/www/jcita/bootstrap/cache
+            sudo chmod -R 775 /var/www/jcita/storage /var/www/jcita/bootstrap/cache
+
+            echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+            echo "  🐘 Ensuring PHP pgsql extension..."
+            echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+            PHP_VER=$(php -r 'echo PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;')
+            if ! php -m | grep -q pdo_pgsql; then
+              sudo apt-get install -y php${PHP_VER}-pgsql
+              sudo systemctl restart php${PHP_VER}-fpm || true
+            fi
 
             echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
             echo "  🔧 Installing PHP dependencies..."
