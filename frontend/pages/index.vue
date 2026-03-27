@@ -1,22 +1,7 @@
 <script setup lang="ts">
 const { isLoggedIn } = useAuth()
 const { subscribe } = usePush()
-
-const isDark = ref(true)
-
-const applyMode = (dark: boolean) => {
-    if (dark) {
-        document.documentElement.classList.add('dark')
-    } else {
-        document.documentElement.classList.remove('dark')
-    }
-}
-
-const toggleColorMode = () => {
-    isDark.value = !isDark.value
-    localStorage.setItem('jcita-color-mode', isDark.value ? 'dark' : 'light')
-    applyMode(isDark.value)
-}
+const { isDark, toggleColorMode, initColorMode } = useAppColorMode()
 
 const showBanner = ref(false)
 
@@ -29,9 +14,7 @@ onMounted(() => {
         return
     }
 
-    const saved = localStorage.getItem('jcita-color-mode')
-    isDark.value = saved ? saved === 'dark' : true
-    applyMode(isDark.value)
+    initColorMode()
 
     if ('Notification' in window && Notification.permission === 'default') {
         showBanner.value = true

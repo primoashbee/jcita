@@ -4,6 +4,7 @@ export default defineNuxtConfig({
 
     modules: [
         '@nuxtjs/tailwindcss',
+        '@pinia/nuxt',
         '@vite-pwa/nuxt',
     ],
 
@@ -46,6 +47,8 @@ export default defineNuxtConfig({
             apiBase: process.env.API_BASE_URL || 'http://localhost:8000/api',
         },
     },
+
+    css: ['~/assets/css/main.css'],
 
     typescript: {
         strict: true,

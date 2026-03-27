@@ -4,6 +4,7 @@ definePageMeta({ middleware: 'guest' })
 useHead({ title: 'Create Account — JCITA' })
 
 const { register, loginWithProvider } = useAuth()
+const { isDark, toggleColorMode, initColorMode } = useAppColorMode()
 const router = useRouter()
 
 const form = reactive({ name: '', email: '', password: '', passwordConfirmation: '' })
@@ -35,33 +36,48 @@ const submit = async () => {
     }
 }
 
+onMounted(() => { initColorMode() })
+
 const focusStyle = (e: Event) => {
     (e.target as HTMLInputElement).style.borderColor = '#fbbf24'
 }
 const blurStyle = (e: Event) => {
-    (e.target as HTMLInputElement).style.borderColor = '#333'
+    (e.target as HTMLInputElement).style.borderColor = ''
 }
 </script>
 
 <template>
-    <div style="min-height:100vh; background:#0a0a0a; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:48px 24px;">
+    <div style="min-height:100vh; background:var(--bg); color:var(--text); display:flex; flex-direction:column; align-items:center; justify-content:center; padding:48px 24px; position:relative;">
+
+        <!-- Color mode toggle -->
+        <button
+            style="position:absolute; top:16px; right:16px; background:var(--card-bg); border:1px solid var(--border); border-radius:10px; padding:8px; cursor:pointer; color:var(--text-muted); display:flex; align-items:center; justify-content:center;"
+            @click="toggleColorMode"
+        >
+            <svg v-if="isDark" style="width:18px;height:18px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707M17.657 17.657l-.707-.707M6.343 6.343l-.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z"/>
+            </svg>
+            <svg v-else style="width:18px;height:18px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+            </svg>
+        </button>
 
         <!-- Logo -->
         <NuxtLink to="/" style="display:block; text-align:center; margin-bottom:32px;">
             <img
                 :src="'/logo.png'"
                 alt="JCITA"
-                class="invert"
+                :class="isDark ? 'invert' : ''"
                 style="height:60px; width:auto; display:block; margin:0 auto 16px;"
             />
-            <span style="color:#737373; font-size:13px;">Jesus Christ is the Answer</span>
+            <span style="color:var(--text-muted); font-size:13px;">Jesus Christ is the Answer</span>
         </NuxtLink>
 
         <!-- Card -->
-        <div style="width:100%; max-width:400px; background:#171717; border:1px solid #262626; border-radius:20px; padding:32px;">
+        <div style="width:100%; max-width:400px; background:var(--card-bg); border:1px solid var(--border); border-radius:20px; padding:32px;">
 
-            <h1 style="color:#fff; font-size:24px; font-weight:900; text-align:center; margin:0 0 4px;">Create account</h1>
-            <p style="color:#737373; font-size:14px; text-align:center; margin:0 0 28px;">Join the JCITA community</p>
+            <h1 style="color:var(--text); font-size:24px; font-weight:900; text-align:center; margin:0 0 4px;">Create account</h1>
+            <p style="color:var(--text-muted); font-size:14px; text-align:center; margin:0 0 28px;">Join the JCITA community</p>
 
             <!-- Error -->
             <div v-if="error" style="background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.2); border-radius:12px; padding:12px 14px; color:#f87171; font-size:13px; margin-bottom:20px; display:flex; align-items:flex-start; gap:8px;">
@@ -74,7 +90,7 @@ const blurStyle = (e: Event) => {
             <!-- Google -->
             <button
                 type="button"
-                style="width:100%; display:flex; align-items:center; justify-content:center; gap:10px; padding:12px; background:#fff; border:1px solid #e5e7eb; border-radius:12px; color:#111; font-size:14px; font-weight:600; cursor:pointer; margin-bottom:20px;"
+                style="width:100%; display:flex; align-items:center; justify-content:center; gap:10px; padding:12px; background:#fff; border:1px solid #e5e7eb; border-radius:12px; color:#111; font-size:14px; font-weight:600; cursor:pointer; margin-bottom:20px; transition:background 0.2s;"
                 @click="loginWithProvider('google')"
                 @mouseenter="($event.currentTarget as HTMLElement).style.background='#f3f4f6'"
                 @mouseleave="($event.currentTarget as HTMLElement).style.background='#fff'"
@@ -90,21 +106,21 @@ const blurStyle = (e: Event) => {
 
             <!-- Divider -->
             <div style="display:flex; align-items:center; gap:12px; margin-bottom:24px;">
-                <div style="flex:1; height:1px; background:#262626;"></div>
-                <span style="color:#525252; font-size:11px; text-transform:uppercase; letter-spacing:0.1em;">or</span>
-                <div style="flex:1; height:1px; background:#262626;"></div>
+                <div style="flex:1; height:1px; background:var(--border);"></div>
+                <span style="color:var(--text-muted); font-size:11px; text-transform:uppercase; letter-spacing:0.1em;">or</span>
+                <div style="flex:1; height:1px; background:var(--border);"></div>
             </div>
 
             <!-- Name -->
             <div style="margin-bottom:16px;">
-                <label style="display:block; color:#a3a3a3; font-size:13px; font-weight:500; margin-bottom:8px;">Full Name</label>
+                <label style="display:block; color:var(--text-secondary); font-size:13px; font-weight:500; margin-bottom:8px;">Full Name</label>
                 <input
                     v-model="form.name"
                     type="text"
                     required
                     autocomplete="name"
                     placeholder="Your name"
-                    style="width:100%; padding:12px 16px; background:#262626; border:1px solid #333; border-radius:12px; color:#fff; font-size:14px; outline:none; box-sizing:border-box;"
+                    style="width:100%; padding:12px 16px; background:var(--input-bg); border:1px solid var(--border-input); border-radius:12px; color:var(--text); font-size:14px; outline:none; box-sizing:border-box;"
                     @focus="focusStyle"
                     @blur="blurStyle"
                 />
@@ -112,14 +128,14 @@ const blurStyle = (e: Event) => {
 
             <!-- Email -->
             <div style="margin-bottom:16px;">
-                <label style="display:block; color:#a3a3a3; font-size:13px; font-weight:500; margin-bottom:8px;">Email</label>
+                <label style="display:block; color:var(--text-secondary); font-size:13px; font-weight:500; margin-bottom:8px;">Email</label>
                 <input
                     v-model="form.email"
                     type="email"
                     required
                     autocomplete="email"
                     placeholder="you@example.com"
-                    style="width:100%; padding:12px 16px; background:#262626; border:1px solid #333; border-radius:12px; color:#fff; font-size:14px; outline:none; box-sizing:border-box;"
+                    style="width:100%; padding:12px 16px; background:var(--input-bg); border:1px solid var(--border-input); border-radius:12px; color:var(--text); font-size:14px; outline:none; box-sizing:border-box;"
                     @focus="focusStyle"
                     @blur="blurStyle"
                 />
@@ -127,7 +143,7 @@ const blurStyle = (e: Event) => {
 
             <!-- Password -->
             <div style="margin-bottom:16px;">
-                <label style="display:block; color:#a3a3a3; font-size:13px; font-weight:500; margin-bottom:8px;">Password</label>
+                <label style="display:block; color:var(--text-secondary); font-size:13px; font-weight:500; margin-bottom:8px;">Password</label>
                 <div style="position:relative;">
                     <input
                         v-model="form.password"
@@ -135,7 +151,7 @@ const blurStyle = (e: Event) => {
                         required
                         autocomplete="new-password"
                         placeholder="Min. 8 characters"
-                        style="width:100%; padding:12px 44px 12px 16px; background:#262626; border:1px solid #333; border-radius:12px; color:#fff; font-size:14px; outline:none; box-sizing:border-box;"
+                        style="width:100%; padding:12px 44px 12px 16px; background:var(--input-bg); border:1px solid var(--border-input); border-radius:12px; color:var(--text); font-size:14px; outline:none; box-sizing:border-box;"
                         @focus="focusStyle"
                         @blur="blurStyle"
                     />
@@ -148,7 +164,7 @@ const blurStyle = (e: Event) => {
 
             <!-- Confirm Password -->
             <div style="margin-bottom:24px;">
-                <label style="display:block; color:#a3a3a3; font-size:13px; font-weight:500; margin-bottom:8px;">Confirm Password</label>
+                <label style="display:block; color:var(--text-secondary); font-size:13px; font-weight:500; margin-bottom:8px;">Confirm Password</label>
                 <div style="position:relative;">
                     <input
                         v-model="form.passwordConfirmation"
@@ -156,7 +172,7 @@ const blurStyle = (e: Event) => {
                         required
                         autocomplete="new-password"
                         placeholder="Repeat your password"
-                        style="width:100%; padding:12px 44px 12px 16px; background:#262626; border:1px solid #333; border-radius:12px; color:#fff; font-size:14px; outline:none; box-sizing:border-box;"
+                        style="width:100%; padding:12px 44px 12px 16px; background:var(--input-bg); border:1px solid var(--border-input); border-radius:12px; color:var(--text); font-size:14px; outline:none; box-sizing:border-box;"
                         @focus="focusStyle"
                         @blur="blurStyle"
                     />
@@ -183,7 +199,7 @@ const blurStyle = (e: Event) => {
                 {{ loading ? 'Creating account…' : 'Create Account' }}
             </button>
 
-            <p style="text-align:center; margin-top:20px; font-size:13px; color:#525252;">
+            <p style="text-align:center; margin-top:20px; font-size:13px; color:var(--text-muted);">
                 Already have an account?
                 <NuxtLink to="/auth/login" style="color:#fbbf24; font-weight:600; text-decoration:none; margin-left:4px;">Sign in</NuxtLink>
             </p>

@@ -4,12 +4,17 @@ definePageMeta({ middleware: 'guest' })
 useHead({ title: 'Sign In — JCITA' })
 
 const { login, loginWithProvider } = useAuth()
+const { isDark, toggleColorMode, initColorMode } = useAppColorMode()
 const router = useRouter()
 
 const form = reactive({ email: '', password: '' })
 const error = ref('')
 const loading = ref(false)
 const showPassword = ref(false)
+
+onMounted(() => {
+    initColorMode()
+})
 
 const submit = async () => {
     error.value = ''
@@ -32,24 +37,37 @@ const submit = async () => {
 </script>
 
 <template>
-    <div style="min-height:100vh; background:#0a0a0a; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:48px 24px;">
+    <div style="min-height:100vh; background:var(--bg); color:var(--text); display:flex; flex-direction:column; align-items:center; justify-content:center; padding:48px 24px; position:relative;">
+
+        <!-- Color mode toggle -->
+        <button
+            style="position:absolute; top:16px; right:16px; background:var(--card-bg); border:1px solid var(--border); border-radius:10px; padding:8px; cursor:pointer; color:var(--text-muted); display:flex; align-items:center; justify-content:center;"
+            @click="toggleColorMode"
+        >
+            <svg v-if="isDark" style="width:18px;height:18px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707M17.657 17.657l-.707-.707M6.343 6.343l-.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z"/>
+            </svg>
+            <svg v-else style="width:18px;height:18px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+            </svg>
+        </button>
 
         <!-- Logo -->
         <NuxtLink to="/" style="display:block; text-align:center; margin-bottom:32px;">
             <img
                 :src="'/logo.png'"
                 alt="JCITA"
-                class="invert"
+                :class="isDark ? 'invert' : ''"
                 style="height:60px; width:auto; display:block; margin:0 auto 16px;"
             />
-            <span style="color:#737373; font-size:13px;">Jesus Christ is the Answer</span>
+            <span style="color:var(--text-muted); font-size:13px;">Jesus Christ is the Answer</span>
         </NuxtLink>
 
         <!-- Card -->
-        <div style="width:100%; max-width:400px; background:#171717; border:1px solid #262626; border-radius:20px; padding:32px;">
+        <div style="width:100%; max-width:400px; background:var(--card-bg); border:1px solid var(--border); border-radius:20px; padding:32px;">
 
-            <h1 style="color:#fff; font-size:24px; font-weight:900; text-align:center; margin:0 0 4px;">Sign in</h1>
-            <p style="color:#737373; font-size:14px; text-align:center; margin:0 0 28px;">Welcome back</p>
+            <h1 style="color:var(--text); font-size:24px; font-weight:900; text-align:center; margin:0 0 4px;">Sign in</h1>
+            <p style="color:var(--text-muted); font-size:14px; text-align:center; margin:0 0 28px;">Welcome back</p>
 
             <!-- Error -->
             <div v-if="error" style="background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.2); border-radius:12px; padding:12px 14px; color:#f87171; font-size:13px; margin-bottom:20px; display:flex; align-items:flex-start; gap:8px;">
@@ -62,7 +80,7 @@ const submit = async () => {
             <!-- Google -->
             <button
                 type="button"
-                style="width:100%; display:flex; align-items:center; justify-content:center; gap:10px; padding:12px; background:#fff; border:1px solid #e5e7eb; border-radius:12px; color:#111; font-size:14px; font-weight:600; cursor:pointer; margin-bottom:12px; transition:background 0.2s;"
+                style="width:100%; display:flex; align-items:center; justify-content:center; gap:10px; padding:12px; background:#fff; border:1px solid #e5e7eb; border-radius:12px; color:#111; font-size:14px; font-weight:600; cursor:pointer; margin-bottom:20px; transition:background 0.2s;"
                 @click="loginWithProvider('google')"
                 @mouseenter="($event.currentTarget as HTMLElement).style.background='#f3f4f6'"
                 @mouseleave="($event.currentTarget as HTMLElement).style.background='#fff'"
@@ -78,29 +96,29 @@ const submit = async () => {
 
             <!-- Divider -->
             <div style="display:flex; align-items:center; gap:12px; margin-bottom:24px;">
-                <div style="flex:1; height:1px; background:#262626;"></div>
-                <span style="color:#525252; font-size:11px; text-transform:uppercase; letter-spacing:0.1em;">or</span>
-                <div style="flex:1; height:1px; background:#262626;"></div>
+                <div style="flex:1; height:1px; background:var(--border);"></div>
+                <span style="color:var(--text-muted); font-size:11px; text-transform:uppercase; letter-spacing:0.1em;">or</span>
+                <div style="flex:1; height:1px; background:var(--border);"></div>
             </div>
 
             <!-- Email -->
             <div style="margin-bottom:16px;">
-                <label style="display:block; color:#a3a3a3; font-size:13px; font-weight:500; margin-bottom:8px;">Email</label>
+                <label style="display:block; color:var(--text-secondary); font-size:13px; font-weight:500; margin-bottom:8px;">Email</label>
                 <input
                     v-model="form.email"
                     type="email"
                     required
                     autocomplete="email"
                     placeholder="you@example.com"
-                    style="width:100%; padding:12px 16px; background:#262626; border:1px solid #333; border-radius:12px; color:#fff; font-size:14px; outline:none; box-sizing:border-box; transition:border-color 0.2s;"
+                    style="width:100%; padding:12px 16px; background:var(--input-bg); border:1px solid var(--border-input); border-radius:12px; color:var(--text); font-size:14px; outline:none; box-sizing:border-box; transition:border-color 0.2s;"
                     @focus="($event.target as HTMLInputElement).style.borderColor='#fbbf24'"
-                    @blur="($event.target as HTMLInputElement).style.borderColor='#333'"
+                    @blur="($event.target as HTMLInputElement).style.borderColor=''"
                 />
             </div>
 
             <!-- Password -->
             <div style="margin-bottom:24px;">
-                <label style="display:block; color:#a3a3a3; font-size:13px; font-weight:500; margin-bottom:8px;">Password</label>
+                <label style="display:block; color:var(--text-secondary); font-size:13px; font-weight:500; margin-bottom:8px;">Password</label>
                 <div style="position:relative;">
                     <input
                         v-model="form.password"
@@ -108,14 +126,14 @@ const submit = async () => {
                         required
                         autocomplete="current-password"
                         placeholder="••••••••"
-                        style="width:100%; padding:12px 44px 12px 16px; background:#262626; border:1px solid #333; border-radius:12px; color:#fff; font-size:14px; outline:none; box-sizing:border-box; transition:border-color 0.2s;"
+                        style="width:100%; padding:12px 44px 12px 16px; background:var(--input-bg); border:1px solid var(--border-input); border-radius:12px; color:var(--text); font-size:14px; outline:none; box-sizing:border-box; transition:border-color 0.2s;"
                         @focus="($event.target as HTMLInputElement).style.borderColor='#fbbf24'"
-                        @blur="($event.target as HTMLInputElement).style.borderColor='#333'"
+                        @blur="($event.target as HTMLInputElement).style.borderColor=''"
                     />
                     <button
                         type="button"
                         tabindex="-1"
-                        style="position:absolute; right:14px; top:50%; transform:translateY(-50%); background:none; border:none; color:#525252; cursor:pointer; padding:0; display:flex;"
+                        style="position:absolute; right:14px; top:50%; transform:translateY(-50%); background:none; border:none; color:var(--text-tertiary); cursor:pointer; padding:0; display:flex;"
                         @click="showPassword = !showPassword"
                     >
                         <svg v-if="!showPassword" style="width:16px;height:16px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -145,7 +163,7 @@ const submit = async () => {
                 {{ loading ? 'Signing in…' : 'Sign In' }}
             </button>
 
-            <p style="text-align:center; margin-top:20px; font-size:13px; color:#525252;">
+            <p style="text-align:center; margin-top:20px; font-size:13px; color:var(--text-muted);">
                 No account?
                 <NuxtLink to="/auth/register" style="color:#fbbf24; font-weight:600; text-decoration:none; margin-left:4px;">Sign up</NuxtLink>
             </p>
