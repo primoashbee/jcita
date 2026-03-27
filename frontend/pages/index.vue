@@ -1,19 +1,18 @@
 <script setup lang="ts">
 const { isLoggedIn } = useAuth()
-
-// PWA entry point: always redirect based on auth state
-const router = useRouter()
-if (isLoggedIn.value) {
-    await navigateTo('/dashboard', { replace: true })
-} else {
-    await navigateTo('/auth/login', { replace: true })
-}
-
 const { subscribe } = usePush()
 
 const showBanner = ref(false)
 
 onMounted(() => {
+    const isPwa = window.matchMedia('(display-mode: standalone)').matches
+        || (window.navigator as any).standalone === true
+
+    if (isPwa) {
+        navigateTo(isLoggedIn.value ? '/dashboard' : '/auth/login', { replace: true })
+        return
+    }
+
     if ('Notification' in window && Notification.permission === 'default') {
         showBanner.value = true
     }
