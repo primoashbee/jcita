@@ -68,10 +68,10 @@ jobs:
             echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
             echo "  🔑 Fixing permissions..."
             echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-            sudo chown -R www-data:www-data /var/www/jcita/storage /var/www/jcita/bootstrap/cache /var/www/jcita/database
+            sudo chown -R $USER:www-data /var/www/jcita/storage /var/www/jcita/bootstrap/cache /var/www/jcita/database
             sudo chmod -R 775 /var/www/jcita/storage /var/www/jcita/bootstrap/cache /var/www/jcita/database
-            touch /var/www/jcita/database/database.sqlite
-            sudo chown www-data:www-data /var/www/jcita/database/database.sqlite
+            sudo touch /var/www/jcita/database/database.sqlite
+            sudo chown $USER:www-data /var/www/jcita/database/database.sqlite
             sudo chmod 664 /var/www/jcita/database/database.sqlite
 
             echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
