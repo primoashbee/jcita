@@ -14,7 +14,13 @@ class SocialAuthController extends Controller
     {
         $this->validateProvider($provider);
 
-        return Socialite::driver($provider)->stateless()->redirect();
+        $driver = Socialite::driver($provider)->stateless();
+
+        if ($provider === 'facebook') {
+            $driver->scopes(['public_profile']);
+        }
+
+        return $driver->redirect();
     }
 
     public function callback(string $provider): \Illuminate\Http\RedirectResponse
@@ -29,29 +35,33 @@ class SocialAuthController extends Controller
             return redirect("{$frontendUrl}/auth/login?error=oauth_failed");
         }
 
+        $socialId    = $socialUser->getId();
+        $socialEmail = $socialUser->getEmail();
+
         $user = User::where('social_provider', $provider)
-            ->where('social_id', $socialUser->getId())
+            ->where('social_id', $socialId)
             ->first();
 
-        if (! $user) {
-            $user = User::where('email', $socialUser->getEmail())->first();
-
+        if (! $user && $socialEmail) {
+            $user = User::where('email', $socialEmail)->first();
             if ($user) {
                 $user->update([
                     'social_provider' => $provider,
-                    'social_id'       => $socialUser->getId(),
-                    'avatar'          => $socialUser->getAvatar(),
-                ]);
-            } else {
-                $user = User::create([
-                    'name'            => $socialUser->getName() ?? $socialUser->getNickname() ?? 'User',
-                    'email'           => $socialUser->getEmail(),
-                    'password'        => Hash::make(Str::random(32)),
-                    'social_provider' => $provider,
-                    'social_id'       => $socialUser->getId(),
+                    'social_id'       => $socialId,
                     'avatar'          => $socialUser->getAvatar(),
                 ]);
             }
+        }
+
+        if (! $user) {
+            $user = User::create([
+                'name'            => $socialUser->getName() ?? $socialUser->getNickname() ?? 'User',
+                'email'           => $socialEmail ?? "{$socialId}@{$provider}.social",
+                'password'        => Hash::make(Str::random(32)),
+                'social_provider' => $provider,
+                'social_id'       => $socialId,
+                'avatar'          => $socialUser->getAvatar(),
+            ]);
         }
 
         $token = $user->createToken('auth_token')->plainTextToken;
