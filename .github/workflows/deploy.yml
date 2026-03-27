@@ -42,6 +42,7 @@ jobs:
           source: "frontend/.output"
           target: "/var/www/jcita/frontend"
           strip_components: 1
+          rm: true
 
       # ─── Deploy Laravel + Restart ───────────────────────────────
       - name: Deploy via SSH
