@@ -72,8 +72,7 @@ export const useAuth = () => {
     }
 
     const loginWithProvider = (provider: 'google' | 'facebook'): void => {
-        const backendUrl = apiBase.replace('/api', '')
-        window.location.href = `${backendUrl}/auth/${provider}/redirect`
+        window.location.href = `${apiBase}/auth/${provider}/redirect`
     }
 
     return {
